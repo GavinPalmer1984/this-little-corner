@@ -144,3 +144,5 @@ package-lock.json
 http_ca.crt
 src/search-app/configure-secrets.ps1
 src/search-app/secrets
+
+src/data/raw_transcripts

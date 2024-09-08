@@ -4,14 +4,20 @@ from elasticsearch import Elasticsearch
 import json
 import requests
 import os
+import re
 
 insecure_prod_hashtag_yolo = 'http://this-little-corner.com:80/indexer' # todo security i guess
+index_name = os.getenv('INDEX_NAME', 'this_little_corner')
+
 domain = os.getenv('ES_HOST')
 port = os.getenv('ES_PORT')
 username = os.getenv('ES_USERNAME')
 password = os.getenv('ES_PASSWORD')
 cert = os.getenv('ES_TLS_CRT')
 yt_api_key = os.getenv('YOUTUBE_API_KEY')
+get_yt_channels_from_tlc_api = os.getenv('GET_YOUTUBE_CHANNELS_FROM_TLC_API', True)
+get_yt_channels_from_env = os.getenv('GET_YOUTUBE_CHANNELS_FROM_ENV', False)
+yt_channels_from_env = os.getenv('YOUTUBE_CHANNELS_FROM_ENV')
 
 if not domain and not port:
     domain = 'this-little-corner-elastic.ngrok.io'
@@ -19,8 +25,12 @@ if not domain and not port:
 
 
 def get_channels():
-    response = requests.get('http://this-little-corner.com/api/channels')
-    return json.loads(response.content)
+    if get_yt_channels_from_tlc_api != '0':
+        channels = requests.get('http://this-little-corner.com/api/channels').content
+        # [{"Id":"UCCebR16tXbv5Ykk9_WtCCug","Name":"Agapologia","SearchNames":["agapologia","golden"]}]
+    elif get_yt_channels_from_env == '1':
+        channels = yt_channels_from_env
+    return json.loads(channels)
 
 
 def get_video_details(key, video_id):
@@ -40,10 +50,6 @@ def get_video_details(key, video_id):
     if 'items' not in content:
         print('invalid response: will not index')
     return content['items'][0]['snippet']
-
-
-
-index_name = 'this_little_corner'
 
 
 def create_index(es_object):
@@ -125,7 +131,26 @@ def connect_elasticsearch():
         return None
 
 
-def get_transcript(video_id):
+def get_transcript(video_id, channel_id = None):
+    transcript_array = []
+    if channel_id:
+        transcript_file = os.path.join("src", "data", "raw_transcripts", channel_id, f"{video_id}.txt")
+        if os.path.exists(transcript_file):
+            with open(transcript_file, 'r', encoding='utf-8') as file:
+                transcript = file.read()
+            print(f"Transcript found for video {video_id} in the local file system.")
+
+            for line in transcript.split('\n'):
+                match = re.match(r'(\d+\.\d+)\s*-\s*(\d+\.\d+):\s*(.*)', line)
+                if match:
+                    start, duration, text = match.groups()
+                    transformed_line = {
+                        'text': text.strip(),
+                        'start': float(start),
+                        'duration': float(duration)
+                    }
+                    transcript_array.append(transformed_line)
+            return transcript_array
     try:
         return YouTubeTranscriptApi.get_transcript(video_id)
     except (TranscriptsDisabled, NoTranscriptFound):
@@ -184,7 +209,7 @@ def index_channel(elastic, name, channel_id):
             more_details = get_video_details(youtube_api_key, video_id)
             video_description = more_details['description']
             video_date = more_details['publishedAt'].split('T')[0]
-            transcript_parts = get_transcript(video_id)
+            transcript_parts = get_transcript(video_id, channel_id)
             transcript_full_string = ' '.join([x['text'] for x in transcript_parts])
 
             to_index = {
