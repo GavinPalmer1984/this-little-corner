@@ -36,23 +36,51 @@ namespace SearchServer
             {
                 endpoints.MapGet("/api/channels", async context =>
                 {
-                    var result = new ChannelsRequestHandler().GetChannels();
-                    string jsonResult = JsonConvert.SerializeObject(result);
-                    await context.Response.WriteAsync(jsonResult);
+                    string channelsFromEnv = new SecretsManager().GetSecret(SecretsManager.YOUTUBE_CHANNELS_FROM_ENV);
+                    if (channelsFromEnv != null) {
+                        await context.Response.WriteAsync(channelsFromEnv);
+                    } else {
+                        var result = new ChannelsRequestHandler().GetChannels();
+                        string jsonResult = JsonConvert.SerializeObject(result);
+                        await context.Response.WriteAsync(jsonResult);
+                    }
                 });
                 
                 endpoints.MapGet("/api/search", async context =>
                 {
-                    string query = context.Request.Query["q"].ToString().Replace("“", "\"").Replace("”", "\"");
-                    string sort = context.Request.Query["sort"];
-                    string channel = context.Request.Query["channel"];
-                    int.TryParse(context.Request.Query["page"], out int page);
-                    int.TryParse(context.Request.Query["size"], out int size);
-                    
-                    var request = new SearchRequest {Query = query, Sort = sort, Channel = channel, Page = page, PageSize = size};
-                    var result = new SearchRequestHandler().GetResponse(request);
-                    string jsonResult = JsonConvert.SerializeObject(result);
-                    await context.Response.WriteAsync(jsonResult);
+                    try
+                    {
+                        // Parse query parameters
+                        string query = context.Request.Query["q"].ToString().Replace("“", "\"").Replace("”", "\"");
+                        DataTracker.Log("query: " + query);
+                        string sort = context.Request.Query["sort"];
+                        string channel = context.Request.Query["channel"];
+                        int.TryParse(context.Request.Query["page"], out int page);
+                        int.TryParse(context.Request.Query["size"], out int size);
+
+                        // Create a request object
+                        var request = new SearchRequest { Query = query, Sort = sort, Channel = channel, Page = page, PageSize = size };
+
+                        // Handle the request and get the response
+                        var result = new SearchRequestHandler().GetResponse(request);
+
+                        // Serialize the result to JSON
+                        string jsonResult = JsonConvert.SerializeObject(result);
+                        DataTracker.Log("result: " + jsonResult);
+
+                        // Write the result to the response
+                        await context.Response.WriteAsync(jsonResult);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the error to the console or to a logging system
+                        Console.WriteLine($"An error occurred: {ex.Message}");
+                        Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+                        // Return a 500 Internal Server Error response with error details
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync($"An internal server error occurred: {ex.Message}");
+                    }
                 });
                 
                 endpoints.MapGet("/api/transcript", async context =>

@@ -7,8 +7,11 @@ using Google.Apis.YouTube.v3;
 using Google.Apis.YouTube.v3.Data;
 using SearchServer.Model;
 using SearchServer.RequestHandlers;
-using YoutubeTranscriptApi;
 using Channel = SearchServer.Model.Channel;
+
+#if YOUTUBE_API_ENABLED_FOR_CS
+using YoutubeTranscriptApi;
+#endif
 
 namespace SearchServer
 {
@@ -121,6 +124,7 @@ namespace SearchServer
 
         private IndexResult IndexVideo(string channelId, PlaylistItem playlistItem)
         {
+            #if YOUTUBE_API_ENABLED_FOR_CS
             try
             {
                 string videoId = playlistItem.Snippet.ResourceId.VideoId;
@@ -160,6 +164,8 @@ namespace SearchServer
                 Console.Write("ERROR: " + e);
                 return IndexResult.Error;
             }
+            #endif
+            return IndexResult.Error;
         }
 
         private enum IndexResult

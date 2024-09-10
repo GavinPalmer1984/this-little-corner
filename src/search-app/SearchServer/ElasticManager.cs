@@ -25,13 +25,18 @@ namespace SearchServer
             string elasticTlsCrt = new SecretsManager().GetSecret(SecretsManager.ELASTIC_CERT);
 
             var pool = new SingleNodeConnectionPool(new Uri(elasticUri));
-            ConnectionSettings settings = new ConnectionSettings(pool).DefaultIndex("this_little_corner");
+            ConnectionSettings settings = new ConnectionSettings(pool)
+                .DefaultIndex("this_little_corner")
+                .ServerCertificateValidationCallback((sender, certificate, chain, sslPolicyErrors) => true);  // Bypass certificate validation for dev
 
             if (elasticUsername != null && elasticPassword != null)
                 settings = settings.BasicAuthentication(elasticUsername, elasticPassword);
-            if (elasticTlsCrt != null)
-                settings = settings.ClientCertificate(elasticTlsCrt);
 
+            if (elasticTlsCrt != null)
+                settings = settings.ClientCertificate(elasticTlsCrt); // Only needed if you're using client certificates
+
+            Console.WriteLine(elasticUri);
+            Console.WriteLine(elasticTlsCrt);
             _client = new ElasticClient(settings);
         }
 

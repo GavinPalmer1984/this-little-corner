@@ -223,7 +223,7 @@ export default class SearchPage extends React.Component<ISearchPageProps, {}> {
                     <EuiFlexItem grow={false}>
                       <div hidden={searchResultStore.searchHasHappened()}>
                         <div style={{'height': '50px'}}></div>
-                        <EuiTitle><h1>THIS LITTLE CORNER<br/>OF THE INTERNET</h1></EuiTitle>
+                        <EuiTitle><h1>Video Library<br/>Search Tool</h1></EuiTitle>
                         <div style={{'height': '20px'}}></div>
                       </div>
                     </EuiFlexItem>
@@ -242,14 +242,12 @@ export default class SearchPage extends React.Component<ISearchPageProps, {}> {
                         <p style={{'alignContent': 'left'}} hidden={!this.advancedSearchIsShowing}>
                           Filter by title:
                           <br/>
-                          <i>title(kanye west) fool</i>
+                          <i>title(video title) keyword</i>
                           <br/><br/>
                           Filter by multiple channels:
                           <br/>
-                          <i>channel(peterson, pageau, pvk) chat gpt</i>
+                          <i>channel(food channel name, computer channel name, medicine channel name) keyword</i>
                         </p>
-                        <div style={{'height': '20px'}}></div>
-                        <h2>I (Ryan) am no longer going to maintain this site as of January 2025. It will go offline and no longer be available. The site is open source, and I am happy to hand off the domain if somebody else is wanting to continue maintaining it. I will NOT be involved in helping with that, aside from answering MINIMAL questions (i.e. I am not going to teach you how to set up a server, teach you how to read code, or anything like that.) There's no beef or drama, and it's not because I hate TLC or anything like that. I just want to free up resources and be more focused on my personal life. Reach out to me on Discord if you plan to maintain it.</h2>
                       </div>
                     </EuiFlexItem>
                   </EuiFlexGroup>

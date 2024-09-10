@@ -29,18 +29,18 @@ export default class MenuBar extends React.Component<IMenuBarProps, IMenuBarStat
     return (
       <div className="menubar">
         <div className="menubar-logo" onClick={() => this.changePage(PageTypes.Search)}>
-          THIS LITTLE CORNER
+          Video Library
         </div>
         
         <div className="menubar-links">
           {/*<div className={appState.currentPageType === PageTypes.Search ? "menubar-item active" : "menubar-item"}*/}
           {/*     onClick={() => this.changePage(PageTypes.Search)}>Search</div>*/}
-          <div className={appState.currentPageType === PageTypes.Glossary ? "menubar-item active" : "menubar-item"}
+          {/* <div className={appState.currentPageType === PageTypes.Glossary ? "menubar-item active" : "menubar-item"}
                onClick={() => this.changePage(PageTypes.Glossary)}>Glossary</div>
           <div className={appState.currentPageType === PageTypes.FAQ ? "menubar-item active" : "menubar-item"}
                onClick={() => this.changePage(PageTypes.FAQ)}>FAQ</div>
           <div className={appState.currentPageType === PageTypes.Contact ? "menubar-item active" : "menubar-item"}
-               onClick={() => this.changePage(PageTypes.Contact)}>Contact</div>
+               onClick={() => this.changePage(PageTypes.Contact)}>Contact</div> */}
         </div>
       </div>
     );

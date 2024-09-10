@@ -14,7 +14,7 @@
       <PackageReference Include="RestSharp" Version="110.2.1-alpha.0.10" />
     </ItemGroup>
 
-    <ItemGroup>
+    <ItemGroup Condition="Exists('lib/YoutubeTranscriptApi.dll') Or '$(YOUTUBE_API_ENABLED_FOR_CS)' == 'true'">
       <Reference Include="YoutubeTranscriptApi">
         <HintPath>lib\YoutubeTranscriptApi.dll</HintPath>
       </Reference>
